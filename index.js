@@ -26,6 +26,9 @@ pfServer.use(express.json());
 
 pfServer.use(router)
 
+// pfserver shoul expose the path uploads
+pfServer.use('/uploads',express.static('./uploads'))
+
 //7) define port
 const PORT = 4000;
 

@@ -41,8 +41,19 @@ exports.getHomeProject = async (req, res) => {
 }
 
 exports.getAllProject = async (req, res) => {
+    // getting value from query parameter
+    // syntax: req.query.keyname
+    const searchKey = req.query.search;
+    console.log(searchKey)
+    const query = {
+        language: {
+            // regular expression 
+            // i = to remove case sensitivity
+            $regex: searchKey, $options: 'i'
+        }
+    }
     try {
-        const allProject = await projects.find();
+        const allProject = await projects.find(query);
         res.status(200).json(allProject)
 
     } catch (err) {
@@ -50,12 +61,49 @@ exports.getAllProject = async (req, res) => {
     }
 }
 
-exports.getUserProject = async (req,res)=>{
-    const userId= req.payload
-    try{
-        const userProject= await projects.find({userId:userId});
+exports.getUserProject = async (req, res) => {
+    const userId = req.payload
+    try {
+        const userProject = await projects.find({ userId: userId });
         res.status(200).json(userProject)
-    }catch(err){
+    } catch (err) {
         res.status(401).json("Request failed due to ", err)
+    }
+}
+
+exports.editUserProject = async (req, res) => {
+    const { id } = req.params;
+    const userId = req.payload;
+    console.log("project id", id)
+    console.log("user id", userId)
+    const { title, language, github, website, overview, projectImage } = req.body;
+    const uploadProjectImage = req.file ? req.file.filename : projectImage;
+    try {
+        const updateProject = await projects.findByIdAndUpdate(
+            { _id: id },
+            {
+                title: title,
+                language: language,
+                github: github,
+                website: website,
+                overview: overview,
+                projectImage: uploadProjectImage,
+                userId: userId
+            },
+            { new: true }
+        )
+        await updateProject.save()
+        res.status(200).json("Project updated successfully")
+    } catch (err) {
+        res.status(401).json("Unable to update due to:", err)
+    }
+}
+exports.deleteUserProject = async (req, res) => {
+    const { id } = req.params
+    try {
+        const removeProject = await projects.findByIdAndDelete({ _id: id })
+        res.status(200).json("Project deleted successfully")
+    } catch (err) {
+        res.status(401).json("delete failed", err)
     }
 }

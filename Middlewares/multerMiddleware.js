@@ -25,7 +25,6 @@ const fileFilter = (req, file, callback)=>{
     }
 }
 const multerConfig = multer({
-    storage,
-    fileFilter
+    storage
 })
 module.exports = multerConfig;
